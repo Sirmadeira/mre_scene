@@ -160,6 +160,7 @@ fn add_replicate(
                 ..default()
             };
             rooms.add_client(client_id, room_id);
+            rooms.add_entity(entity,room_id);
         } else {
             let replicate = Replicate {
                 target: ReplicationTarget {
