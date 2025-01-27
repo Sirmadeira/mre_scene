@@ -139,40 +139,43 @@ fn spawn_scene(asset_server: Res<AssetServer>, mut commands: Commands) {
 }
 
 fn add_replicate(
-    query: Query<(Entity, &CarrierId), Added<ComponentA>>,
+    query: Query<(Entity, &CarrierId), With<ComponentA>>,
     mut commands: Commands,
     mut rooms: ResMut<RoomManager>,
     mut lobby_yes_or_no: Local<bool>,
+    mut event_reader: EventReader<ServerConnectEvent>
 ) {
-    for (entity, carrier_id) in query.iter() {
-        let client_id = carrier_id.0;
-        *lobby_yes_or_no = true;
-
-        let replicate = if *lobby_yes_or_no {
-            let room_id = RoomId(client_id.to_bits());
-            let replicate = Replicate {
-                target: ReplicationTarget {
-                    target: NetworkTarget::All,
-                },
-                relevance_mode: NetworkRelevanceMode::InterestManagement,
-                ..default()
+    for event in event_reader.read(){
+        for (entity, carrier_id) in query.iter() {
+            let client_id = carrier_id.0;
+            *lobby_yes_or_no = true;
+    
+            let replicate = if *lobby_yes_or_no {
+                let room_id = RoomId(client_id.to_bits());
+                let replicate = Replicate {
+                    target: ReplicationTarget {
+                        target: NetworkTarget::All,
+                    },
+                    relevance_mode: NetworkRelevanceMode::InterestManagement,
+                    ..default()
+                };
+                rooms.add_client(client_id, room_id);
+                rooms.add_entity(entity, room_id);
+                info!(
+                    "Started to replicate entity {} with component A in lobby",
+                    entity
+                );
+                commands.entity(entity).insert(replicate);
+            } else {
+                let replicate = Replicate {
+                    target: ReplicationTarget {
+                        target: NetworkTarget::All,
+                    },
+                    ..default()
+                };
+                info!("Started to replicate entity {} with component A", entity);
+                commands.entity(entity).insert(replicate);
             };
-            rooms.add_client(client_id, room_id);
-            rooms.add_entity(entity, room_id);
-            info!(
-                "Started to replicate entity {} with component A in lobby",
-                entity
-            );
-            commands.entity(entity).insert(replicate);
-        } else {
-            let replicate = Replicate {
-                target: ReplicationTarget {
-                    target: NetworkTarget::All,
-                },
-                ..default()
-            };
-            info!("Started to replicate entity {} with component A", entity);
-            commands.entity(entity).insert(replicate);
-        };
+        }   
     }
 }
