@@ -139,37 +139,39 @@ fn spawn_scene(asset_server: Res<AssetServer>, mut commands: Commands) {
 }
 
 fn add_replicate(
-    query: Query<(Entity, &CarrierId), Added<ComponentA>>,
+    query: Query<(Entity, &CarrierId, &Children), Added<ComponentA>>,
     mut commands: Commands,
     mut rooms: ResMut<RoomManager>,
     mut lobby_yes_or_no: Local<bool>,
 ) {
-    for (entity, carrier_id) in query.iter() {
+    for (entity, carrier_id, children) in query.iter() {
         info!("Started to replicate entity {} with component A", entity);
 
-        let client_id = carrier_id.0;
-        *lobby_yes_or_no = true;
+        for child in children {
+            let client_id = carrier_id.0;
+            *lobby_yes_or_no = true;
 
-        let replicate = if *lobby_yes_or_no {
-            let room_id = RoomId(client_id.to_bits());
-            let replicate = Replicate {
-                target: ReplicationTarget {
-                    target: NetworkTarget::All,
-                },
-                relevance_mode: NetworkRelevanceMode::InterestManagement,
-                ..default()
+            let replicate = if *lobby_yes_or_no {
+                let room_id = RoomId(client_id.to_bits());
+                let replicate = Replicate {
+                    target: ReplicationTarget {
+                        target: NetworkTarget::All,
+                    },
+                    relevance_mode: NetworkRelevanceMode::InterestManagement,
+                    ..default()
+                };
+                rooms.add_client(client_id, room_id);
+                rooms.add_entity(entity, room_id);
+            } else {
+                let replicate = Replicate {
+                    target: ReplicationTarget {
+                        target: NetworkTarget::All,
+                    },
+                    ..default()
+                };
             };
-            rooms.add_client(client_id, room_id);
-            rooms.add_entity(entity,room_id);
-        } else {
-            let replicate = Replicate {
-                target: ReplicationTarget {
-                    target: NetworkTarget::All,
-                },
-                ..default()
-            };
-        };
 
-        commands.entity(entity).insert(replicate);
+            commands.entity(entity).insert(replicate);
+        }
     }
 }
