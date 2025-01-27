@@ -1,0 +1,12 @@
+[package]
+name = "mre_scene"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = "0.15.1"
+bevy-inspector-egui = "0.29.1"
+clap = { version = "4.5.27", features = ["derive"] }
+lightyear = "0.18.0"
+serde = "1.0.217"
+

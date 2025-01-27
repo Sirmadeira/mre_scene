@@ -1,0 +1,12 @@
+(
+  resources: {},
+  entities: {
+    4294967296: (
+      components: {
+        "bevy_core::name::Name": "Replicated entity",
+        "mre_scene::shared::CarrierId": (Netcode(0)),
+        "mre_scene::shared::ComponentA": (2),
+      },
+    ),
+  },
+)
