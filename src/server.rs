@@ -145,34 +145,34 @@ fn add_replicate(
     mut lobby_yes_or_no: Local<bool>,
 ) {
     for (entity, carrier_id) in query.iter() {
+        let client_id = carrier_id.0;
+        *lobby_yes_or_no = true;
 
-            let client_id = carrier_id.0;
-            *lobby_yes_or_no = false;
-
-            let replicate = if *lobby_yes_or_no {
-                let room_id = RoomId(client_id.to_bits());
-                let replicate = Replicate {
-                    target: ReplicationTarget {
-                        target: NetworkTarget::All,
-                    },
-                    relevance_mode: NetworkRelevanceMode::InterestManagement,
-                    ..default()
-                };
-                rooms.add_client(client_id, room_id);
-                rooms.add_entity(entity, room_id);
-                info!("Started to replicate entity {} with component A in lobby", entity);
-                commands.entity(entity).insert(replicate);
-            } else {
-                let replicate = Replicate {
-                    target: ReplicationTarget {
-                        target: NetworkTarget::All,
-                    },
-                    ..default()
-                };
-                info!("Started to replicate entity {} with component A", entity);
-                commands.entity(entity).insert(replicate);
+        let replicate = if *lobby_yes_or_no {
+            let room_id = RoomId(client_id.to_bits());
+            let replicate = Replicate {
+                target: ReplicationTarget {
+                    target: NetworkTarget::All,
+                },
+                relevance_mode: NetworkRelevanceMode::InterestManagement,
+                ..default()
             };
-
-        
+            rooms.add_client(client_id, room_id);
+            rooms.add_entity(entity, room_id);
+            info!(
+                "Started to replicate entity {} with component A in lobby",
+                entity
+            );
+            commands.entity(entity).insert(replicate);
+        } else {
+            let replicate = Replicate {
+                target: ReplicationTarget {
+                    target: NetworkTarget::All,
+                },
+                ..default()
+            };
+            info!("Started to replicate entity {} with component A", entity);
+            commands.entity(entity).insert(replicate);
+        };
     }
 }
