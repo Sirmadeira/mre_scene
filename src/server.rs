@@ -150,7 +150,7 @@ fn add_replicate(
             let client_id = carrier_id.0;
             *lobby_yes_or_no = true;
     
-            let replicate = if *lobby_yes_or_no {
+             if *lobby_yes_or_no {
                 let room_id = RoomId(client_id.to_bits());
                 let replicate = Replicate {
                     target: ReplicationTarget {
@@ -165,7 +165,7 @@ fn add_replicate(
                     "Started to replicate entity {} with component A in lobby",
                     entity
                 );
-                commands.entity(entity).insert(replicate);
+                commands.entity(entity).insert(replicate).with_child(ComponentA(0));
             } else {
                 let replicate = Replicate {
                     target: ReplicationTarget {
